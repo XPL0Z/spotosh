@@ -1,0 +1,45 @@
+- name: Deploy spotosh
+  hosts: spotosh
+  tasks:
+    - name: Check required configuration
+      ansible.builtin.assert:
+        that:
+          - spotosh_auth_url | length > 0
+          - vault_auth_secret | default('') | length > 0
+          - vault_auth_github_id | default('') | length > 0
+          - vault_auth_github_secret | default('') | length > 0
+          - vault_lastfm_api_key | default('') | length > 0
+        fail_msg: Set spotosh_auth_url in group_vars/all/vars.yml and the vault_* secrets in group_vars/all/vault.yml
+        quiet: true
+
+    - name: Check for Docker compose
+      ansible.builtin.command: docker compose version
+      register: compose_check
+      changed_when: false
+      failed_when: false
+
+    - name: Install Docker
+      ansible.builtin.include_tasks: tasks/docker.yml
+      when: compose_check.rc != 0 and spotosh_install_docker
+
+    - name: Check out spotosh {{ spotosh_version }}
+      ansible.builtin.git:
+        repo: "{{ spotosh_repo }}"
+        dest: "{{ spotosh_dir }}"
+        version: "{{ spotosh_version }}"
+
+    - name: Write .env for compose
+      ansible.builtin.template:
+        src: env.j2
+        dest: "{{ spotosh_dir }}/ops/.env"
+        mode: "0600"
+      diff: false
+
+    - name: Build and start services
+      community.docker.docker_compose_v2:
+        project_src: "{{ spotosh_dir }}/ops"
+        files: [docker-compose.yml]
+        build: always
+        remove_orphans: true
+        wait: true
+        wait_timeout: 300

@@ -1,0 +1,12 @@
+# Git ref to deploy (branch, tag or commit). Override with: -e spotosh_version=v1.0.1
+spotosh_version: main
+spotosh_repo: https://github.com/dwesh163/spotosh.git
+spotosh_dir: /srv/spotosh/app
+
+# Public URL of the web app, used by NextAuth for OAuth callbacks
+spotosh_auth_url: ""
+
+# Installs Docker Engine + compose plugin (needs sudo) when `docker compose` is missing
+spotosh_install_docker: true
+
+# Secrets (AUTH_SECRET, GitHub OAuth, Last.fm) live in the encrypted vault.yml next to this file

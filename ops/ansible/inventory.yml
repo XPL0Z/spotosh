@@ -1,0 +1,5 @@
+all:
+  hosts:
+    spotosh:
+      ansible_host: 128.178.116.76
+      ansible_user: spotish

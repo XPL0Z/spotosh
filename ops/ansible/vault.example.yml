@@ -1,0 +1,6 @@
+# Template for group_vars/all/vault.yml — create it with:
+#   ansible-vault create group_vars/all/vault.yml
+vault_auth_secret: ""        # openssl rand -base64 32
+vault_auth_github_id: ""
+vault_auth_github_secret: ""
+vault_lastfm_api_key: ""
