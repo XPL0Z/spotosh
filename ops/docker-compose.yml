@@ -1,41 +1,45 @@
+name: spotosh
+
 services:
     web:
-        image: oven/bun:1
-        working_dir: /app
-        command: sh -c "bun install && bun run dev"
+        build:
+            context: ../web
         dns:
             - 127.0.0.11 # Docker interne
             - 8.8.8.8
             - 1.1.1.1
         ports:
             - "3000:3000"
-        volumes:
-            - ./web:/app
         environment:
-            - NODE_ENV=development
-            - NEXT_TELEMETRY_DISABLED=1
             - MUSIC_SERVER_URL=http://server:4000
-            - AUTH_URL=http://localhost:3000
+            - AUTH_URL=${AUTH_URL}
             - AUTH_SECRET=${AUTH_SECRET}
             - AUTH_GITHUB_ID=${AUTH_GITHUB_ID}
             - AUTH_GITHUB_SECRET=${AUTH_GITHUB_SECRET}
             - LASTFM_API_KEY=${LASTFM_API_KEY}
         depends_on:
             - server
+        restart: unless-stopped
 
     server:
-        image: oven/bun:1
-        working_dir: /app
-        command: sh -c "bun install && bun --watch src/index.mjs"
-        ports:
-            - "4000:4000"
+        build:
+            context: ../server
+        expose:
+            - "4000"
+        dns:
+            - 127.0.0.11 # Docker interne
+            - 8.8.8.8
+            - 1.1.1.1
         volumes:
-            - ./server:/app
+            - ${XDG_RUNTIME_DIR:-/run/user/1000}/pulse:${XDG_RUNTIME_DIR:-/run/user/1000}/pulse
+            - ${HOME}/.config/pulse/cookie:/root/.config/pulse/cookie:ro
             - spotosh-data:/data
-            - /run/user/1000/pulse:/run/user/1000/pulse
         environment:
             - DATA_DIR=/data
             - PORT=4000
+            - PULSE_SERVER=unix:${XDG_RUNTIME_DIR:-/run/user/1000}/pulse/native
+            - PULSE_COOKIE=/root/.config/pulse/cookie
+        restart: unless-stopped
         devices:
             - /dev/snd:/dev/snd
 
