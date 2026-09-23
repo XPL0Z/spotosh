@@ -1,7 +1,9 @@
+name: spotosh
+
 services:
     web:
         build:
-            context: ./web
+            context: ../web
         dns:
             - 127.0.0.11 # Docker interne
             - 8.8.8.8
@@ -23,7 +25,7 @@ services:
 
     server:
         build:
-            context: ./server
+            context: ../server
         expose:
             - "4000"
         dns:

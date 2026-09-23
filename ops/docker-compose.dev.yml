@@ -1,3 +1,5 @@
+name: spotosh
+
 services:
     web:
         image: oven/bun:1
@@ -10,7 +12,7 @@ services:
         ports:
             - "3000:3000"
         volumes:
-            - ./web:/app
+            - ../web:/app
         environment:
             - NODE_ENV=development
             - NEXT_TELEMETRY_DISABLED=1
@@ -30,7 +32,7 @@ services:
         ports:
             - "4000:4000"
         volumes:
-            - ./server:/app
+            - ../server:/app
             - spotosh-data:/data
             - /run/user/1000/pulse:/run/user/1000/pulse
         environment:
