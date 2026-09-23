@@ -61,6 +61,7 @@ export const HomePanel = () => {
             ? `/api/genre?id=${preset.genreId}`
             : `/api/playlist?id=${preset.playlistId}`;
         const res = await fetch(url);
+        if (!res.ok) return;
         const tracks: Track[] = await res.json();
         await Promise.all(
           tracks.map((track) =>
