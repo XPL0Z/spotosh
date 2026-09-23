@@ -7,3 +7,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   pages: { signIn: "/login" },
   trustHost: true,
 });
+
+export async function currentUser(): Promise<string> {
+  const session = await auth();
+  return session?.user?.email ?? session?.user?.name ?? "anonymous";
+}

@@ -1,8 +1,14 @@
+import { withLogging } from "@/lib/logger";
+import { currentUser } from "@/services/auth";
+
 const MUSIC_SERVER_URL = process.env.MUSIC_SERVER_URL ?? "http://localhost:4000";
 
-export const GET = async (request: Request) => {
+export const GET = withLogging(async (request: Request) => {
   const upstream = await fetch(`${MUSIC_SERVER_URL}/events`, {
-    headers: { Accept: "text/event-stream" },
+    headers: {
+      Accept: "text/event-stream",
+      "X-User": encodeURIComponent(await currentUser()),
+    },
     signal: request.signal,
   });
 
@@ -14,4 +20,4 @@ export const GET = async (request: Request) => {
       "X-Accel-Buffering": "no",
     },
   });
-};
+});
