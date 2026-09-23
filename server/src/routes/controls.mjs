@@ -2,11 +2,13 @@ import { Router } from 'express'
 import { randomUUID } from 'node:crypto'
 import { state, getState, broadcast } from '../state.mjs'
 import { playItem, advanceQueue, stopCurrent, startProgressTimer } from '../playback.mjs'
+import { log, logError } from '../logger.mjs'
 
 const router = Router()
 
 router.post('/', async (req, res) => {
   const { action, value } = req.body
+  log(`[controls] ${req.user} ${action}${value !== undefined ? ` value=${value}` : ''}`)
 
   try {
     switch (action) {
@@ -90,7 +92,7 @@ router.post('/', async (req, res) => {
         return res.status(400).json({ error: `Unknown action: ${action}` })
     }
   } catch (err) {
-    console.error(`[controls/${action}]`, err.message)
+    logError(`[controls/${action}] ${req.user}`, err.message)
     return res.status(500).json({ error: err.message })
   }
 

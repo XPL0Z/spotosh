@@ -2,6 +2,7 @@ import { Router } from 'express'
 import { randomUUID } from 'node:crypto'
 import { state, getState, broadcast } from '../state.mjs'
 import { playItem } from '../playback.mjs'
+import { log } from '../logger.mjs'
 
 const router = Router()
 
@@ -31,6 +32,7 @@ router.post('/', (req, res) => {
   }
 
   state.queue.push(item)
+  log(`[queue] ${req.user} added "${title}" by ${item.artist || 'unknown'} (${state.queue.length} in queue)`)
 
   if (!state.isPlaying) {
     playItem(item)
@@ -48,14 +50,16 @@ router.patch('/reorder', (req, res) => {
   const reordered = ids.map(id => map.get(id)).filter(Boolean)
   const missing = state.queue.filter(item => !ids.includes(item.id))
   state.queue = [...reordered, ...missing]
+  log(`[queue] ${req.user} reordered ${state.queue.length} items`)
   broadcast()
   res.status(200).json({ ok: true })
 })
 
 router.delete('/:id', (req, res) => {
-  const before = state.queue.length
+  const removed = state.queue.find(i => i.id === req.params.id)
+  if (!removed) return res.status(404).json({ error: 'Not found' })
   state.queue = state.queue.filter(i => i.id !== req.params.id)
-  if (state.queue.length === before) return res.status(404).json({ error: 'Not found' })
+  log(`[queue] ${req.user} removed "${removed.title}" by ${removed.artist || 'unknown'} (${state.queue.length} in queue)`)
   broadcast()
   res.status(204).end()
 })
